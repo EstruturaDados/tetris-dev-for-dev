@@ -1,22 +1,13 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include <stdlib.h> 
+#include <string.h> 
+#include <time.h>   
 
 #define MAX_FILA 5
-#define MAX_PILHA 3 // Definido para uso futuro no Nível Aventureiro
+#define MAX_PILHA 3 
 
 // 🧩 Nível Novato: Fila de Peças Futuras
-//
-// - Crie uma struct Peca com os campos: tipo (char) e id (int).
-// - Implemente uma fila circular com capacidade para 5 peças.
-// - Crie funções como inicializarFila(), enqueue(), dequeue(), filaCheia(), filaVazia().
-// - Cada peça deve ser gerada automaticamente com um tipo aleatório e id sequencial.
-// - Exiba a fila após cada ação com uma função mostrarFila().
-// - Use um menu com opções como:
-//       1 - Jogar peça (remover da frente)
-//       0 - Sair
-// - A cada remoção, insira uma nova peça ao final da fila.
+// (Structs e funções da Fila permanecem idênticas ao Nível Novato)
 
 // Estrutura da Peça
 typedef struct {
@@ -41,7 +32,7 @@ int proximoId = 0;
 Peca gerarPeca() {
     Peca p;
     char tipos[] = {'I', 'O', 'T', 'L'};
-    p.tipo = tipos[rand() % 4]; // Sorteia um dos 4 tipos
+    p.tipo = tipos[rand() % 4]; 
     p.id = proximoId++;
     return p;
 }
@@ -62,39 +53,30 @@ int filaCheia(Fila *f) {
     return f->total == MAX_FILA;
 }
 
-/**
- * Adiciona um elemento ao final da fila (enqueue).
- */
 void enqueue(Fila *f, Peca p) {
     if (filaCheia(f)) {
-        printf("Aviso: Fila cheia! Nao foi possivel inserir.\n");
+        //printf("Aviso: Fila cheia! Nao foi possivel inserir.\n");
         return;
     }
     f->itens[f->fim] = p;
-    f->fim = (f->fim + 1) % MAX_FILA; // Lógica circular
+    f->fim = (f->fim + 1) % MAX_FILA; 
     f->total++;
 }
 
-/**
- * Remove um elemento do início da fila (dequeue).
- */
 Peca dequeue(Fila *f) {
     Peca p;
     if (filaVazia(f)) {
-        printf("Aviso: Fila vazia! Retornando peca nula.\n");
-        p.tipo = ' '; // Valor sentinela
+        //printf("Aviso: Fila vazia! Retornando peca nula.\n");
+        p.tipo = ' '; 
         p.id = -1;
         return p;
     }
     p = f->itens[f->inicio];
-    f->inicio = (f->inicio + 1) % MAX_FILA; // Lógica circular
+    f->inicio = (f->inicio + 1) % MAX_FILA; 
     f->total--;
     return p;
 }
 
-/**
- * Exibe o conteúdo da fila de forma ordenada (Início -> Fim).
- */
 void mostrarFila(Fila *f) {
     if (filaVazia(f)) {
         printf("Fila de pecas: [Vazia]\n");
@@ -103,7 +85,7 @@ void mostrarFila(Fila *f) {
     printf("Fila de pecas (Frente -> Fim):\n");
     
     int i = 0;
-    int idx = f->inicio; // Índice para percorrer a fila circularmente
+    int idx = f->inicio; 
     
     while (i < f->total) {
         printf("[%c%d] ", f->itens[idx].tipo, f->itens[idx].id);
@@ -114,37 +96,114 @@ void mostrarFila(Fila *f) {
 }
 
 
-// Estruturas e funções do Nível Aventureiro (Pilha)
+// 🧠 Nível Aventureiro: Adição da Pilha de Reserva
+//
+// - Implemente uma pilha linear com capacidade para 3 peças.
+// - Crie funções como inicializarPilha(), push(), pop(), pilhaCheia(), pilhaVazia().
+// - Permita enviar uma peça da fila para a pilha (reserva).
+// - Crie um menu com opção:
+//       2 - Enviar peça da fila para a reserva (pilha)
+//       3 - Usar peça da reserva (remover do topo da pilha)
+// - Exiba a pilha junto com a fila após cada ação com mostrarPilha().
+// - Mantenha a fila sempre com 5 peças (repondo com gerarPeca()).
+
+// Estrutura da Pilha
+typedef struct {
+    Peca itens[MAX_PILHA];
+    int topo;
+} Pilha;
+
+// Funções da Pilha (Nível Aventureiro)
+
+void inicializarPilha(Pilha *p) {
+    p->topo = -1; // Convenção para pilha vazia
+}
+
+int pilhaVazia(Pilha *p) {
+    return p->topo == -1;
+}
+
+int pilhaCheia(Pilha *p) {
+    return p->topo == MAX_PILHA - 1;
+}
+
+/**
+ * Adiciona um elemento ao topo da pilha (push).
+ */
+void push(Pilha *p, Peca peca) {
+    if (pilhaCheia(p)) {
+        printf("Erro: Pilha de reserva cheia! Nao pode reservar.\n");
+        return;
+    }
+    p->topo++;
+    p->itens[p->topo] = peca;
+}
+
+/**
+ * Remove um elemento do topo da pilha (pop).
+ */
+Peca pop(Pilha *p) {
+    Peca peca;
+    if (pilhaVazia(p)) {
+        printf("Erro: Pilha de reserva vazia! Nao pode usar.\n");
+        peca.tipo = ' ';
+        peca.id = -1;
+        return peca;
+    }
+    peca = p->itens[p->topo];
+    p->topo--;
+    return peca;
+}
+
+/**
+ * Exibe o conteúdo da pilha (Topo -> Base).
+ */
+void mostrarPilha(Pilha *p) {
+    if (pilhaVazia(p)) {
+        printf("Pilha de reserva: [Vazia]\n");
+        return;
+    }
+    printf("Pilha de reserva (Topo -> Base):\n");
+    for (int i = p->topo; i >= 0; i--) {
+        printf("[%c%d] ", p->itens[i].tipo, p->itens[i].id);
+    }
+    printf("\n");
+}
 
 
 // Estruturas e funções do Nível Mestre (Integração)
 
 
 int main() {
-    srand(time(NULL)); // Inicializa o gerador de números aleatórios
-
+    srand(time(NULL)); 
+    
     Fila fila;
-    inicializarFila(&fila);
+    Pilha pilha; // Nível Aventureiro
 
-    // Preenche a fila inicial com 5 peças (requisito do desafio)
+    inicializarFila(&fila);
+    inicializarPilha(&pilha); // Nível Aventureiro
+
+    // Preenche a fila inicial com 5 peças
     for (int i = 0; i < MAX_FILA; i++) {
         enqueue(&fila, gerarPeca());
     }
 
     int opcao = -1;
     while (opcao != 0) {
-        printf("\n--- Tetris Stack (Nivel Novato) ---\n");
+        printf("\n--- Tetris Stack (Nivel Aventureiro) ---\n");
         mostrarFila(&fila);
-        printf("-------------------------------------\n");
+        mostrarPilha(&pilha); // Nível Aventureiro
+        printf("-----------------------------------------\n");
         printf("Menu:\n");
         printf("  1 - Jogar peca (remove da frente)\n");
+        printf("  2 - Reservar peca (fila -> pilha)\n");
+        printf("  3 - Usar peca reservada (pilha)\n");
         printf("  0 - Sair\n");
         printf("Escolha uma opcao: ");
         
-        // Limpa o buffer de entrada para evitar loops infinitos com char
         if (scanf("%d", &opcao) != 1) {
-            while (getchar() != '\n'); // Limpa entrada inválida
-            opcao = -1; // Força opção inválida
+            while (getchar() != '\n');
+            opcao = -1; 
         }
 
         switch (opcao) {
@@ -154,11 +213,35 @@ int main() {
                 } else {
                     Peca jogada = dequeue(&fila);
                     printf("Peca jogada: [%c%d]\n", jogada.tipo, jogada.id);
-
-                    // Adiciona uma nova peça para manter a fila cheia
-                    Peca nova = gerarPeca();
-                    enqueue(&fila, nova);
-                    printf("Nova peca adicionada a fila: [%c%d]\n", nova.tipo, nova.id);
+                    
+                    // Repõe a peça na fila para manter 5
+                    enqueue(&fila, gerarPeca());
+                }
+                break;
+            }
+            case 2: { // Reservar peça (Fila -> Pilha)
+                if (pilhaCheia(&pilha)) {
+                    printf("Erro: Pilha de reserva esta cheia!\n");
+                } else if (filaVazia(&fila)) {
+                    printf("Erro: Fila esta vazia, nao pode reservar!\n");
+                } else {
+                    // Tira da fila e coloca na pilha
+                    Peca reservada = dequeue(&fila);
+                    push(&pilha, reservada);
+                    printf("Peca [%c%d] reservada.\n", reservada.tipo, reservada.id);
+                    
+                    // Repõe a peça na fila para manter 5
+                    enqueue(&fila, gerarPeca());
+                }
+                break;
+            }
+            case 3: { // Usar peça reservada (Pop Pilha)
+                if (pilhaVazia(&pilha)) {
+                    printf("Erro: Pilha de reserva esta vazia!\n");
+                } else {
+                    Peca usada = pop(&pilha);
+                    printf("Peca [%c%d] usada da reserva.\n", usada.tipo, usada.id);
+                    // Peça usada não volta para a fila
                 }
                 break;
             }
@@ -170,8 +253,6 @@ int main() {
         }
     }
     
-    // Nível Aventureiro: Adição da Pilha de Reserva
-
     // Nível Mestre: Integração Estratégica entre Fila e Pilha
 
     return 0;
