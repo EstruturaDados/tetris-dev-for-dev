@@ -7,7 +7,7 @@
 #define MAX_PILHA 3 
 
 // 🧩 Nível Novato: Fila de Peças Futuras
-// (Structs e funções da Fila permanecem idênticas ao Nível Novato)
+// (Structs e funções da Fila permanecem idênticas)
 
 // Estrutura da Peça
 typedef struct {
@@ -55,7 +55,6 @@ int filaCheia(Fila *f) {
 
 void enqueue(Fila *f, Peca p) {
     if (filaCheia(f)) {
-        //printf("Aviso: Fila cheia! Nao foi possivel inserir.\n");
         return;
     }
     f->itens[f->fim] = p;
@@ -66,7 +65,6 @@ void enqueue(Fila *f, Peca p) {
 Peca dequeue(Fila *f) {
     Peca p;
     if (filaVazia(f)) {
-        //printf("Aviso: Fila vazia! Retornando peca nula.\n");
         p.tipo = ' '; 
         p.id = -1;
         return p;
@@ -83,10 +81,8 @@ void mostrarFila(Fila *f) {
         return;
     }
     printf("Fila de pecas (Frente -> Fim):\n");
-    
     int i = 0;
     int idx = f->inicio; 
-    
     while (i < f->total) {
         printf("[%c%d] ", f->itens[idx].tipo, f->itens[idx].id);
         idx = (idx + 1) % MAX_FILA;
@@ -97,15 +93,6 @@ void mostrarFila(Fila *f) {
 
 
 // 🧠 Nível Aventureiro: Adição da Pilha de Reserva
-//
-// - Implemente uma pilha linear com capacidade para 3 peças.
-// - Crie funções como inicializarPilha(), push(), pop(), pilhaCheia(), pilhaVazia().
-// - Permita enviar uma peça da fila para a pilha (reserva).
-// - Crie um menu com opção:
-//       2 - Enviar peça da fila para a reserva (pilha)
-//       3 - Usar peça da reserva (remover do topo da pilha)
-// - Exiba a pilha junto com a fila após cada ação com mostrarPilha().
-// - Mantenha a fila sempre com 5 peças (repondo com gerarPeca()).
 
 // Estrutura da Pilha
 typedef struct {
@@ -116,7 +103,7 @@ typedef struct {
 // Funções da Pilha (Nível Aventureiro)
 
 void inicializarPilha(Pilha *p) {
-    p->topo = -1; // Convenção para pilha vazia
+    p->topo = -1; 
 }
 
 int pilhaVazia(Pilha *p) {
@@ -127,9 +114,6 @@ int pilhaCheia(Pilha *p) {
     return p->topo == MAX_PILHA - 1;
 }
 
-/**
- * Adiciona um elemento ao topo da pilha (push).
- */
 void push(Pilha *p, Peca peca) {
     if (pilhaCheia(p)) {
         printf("Erro: Pilha de reserva cheia! Nao pode reservar.\n");
@@ -139,9 +123,6 @@ void push(Pilha *p, Peca peca) {
     p->itens[p->topo] = peca;
 }
 
-/**
- * Remove um elemento do topo da pilha (pop).
- */
 Peca pop(Pilha *p) {
     Peca peca;
     if (pilhaVazia(p)) {
@@ -155,9 +136,6 @@ Peca pop(Pilha *p) {
     return peca;
 }
 
-/**
- * Exibe o conteúdo da pilha (Topo -> Base).
- */
 void mostrarPilha(Pilha *p) {
     if (pilhaVazia(p)) {
         printf("Pilha de reserva: [Vazia]\n");
@@ -171,17 +149,76 @@ void mostrarPilha(Pilha *p) {
 }
 
 
-// Estruturas e funções do Nível Mestre (Integração)
+// 🔄 Nível Mestre: Integração Estratégica entre Fila e Pilha
+//
+// - Implemente interações avançadas entre as estruturas:
+//       4 - Trocar a peça da frente da fila com o topo da pilha
+//       5 - Trocar os 3 primeiros da fila com as 3 peças da pilha
+// - Para a opção 4:
+//       Verifique se a fila não está vazia e a pilha tem ao menos 1 peça.
+//       Troque os elementos diretamente nos arrays.
+// - Para a opção 5:
+//       Verifique se a pilha tem exatamente 3 peças e a fila ao menos 3.
+//       Use a lógica de índice circular para acessar os primeiros da fila.
+// - Sempre valide as condições antes da troca e informe mensagens claras ao usuário.
+
+/**
+ * Troca a peça da frente da fila com o topo da pilha.
+ * (Nível Mestre - Opção 4)
+ */
+void trocarPecaFilaPilha(Fila *f, Pilha *p) {
+    // Validação: Ambas as estruturas devem ter pelo menos uma peça.
+    if (filaVazia(f) || pilhaVazia(p)) {
+        printf("Erro: Fila e Pilha precisam ter pelo menos 1 peca para trocar.\n");
+        return;
+    }
+
+    // Troca a peça da frente da fila (f->inicio) com o topo da pilha (p->topo)
+    Peca temp = f->itens[f->inicio];
+    f->itens[f->inicio] = p->itens[p->topo];
+    p->itens[p->topo] = temp;
+
+    printf("Troca realizada: Frente da Fila <-> Topo da Pilha.\n");
+}
+
+/**
+ * Troca as 3 primeiras peças da fila com as 3 peças da pilha.
+ * (Nível Mestre - Opção 5)
+ */
+void trocar3PecasFilaPilha(Fila *f, Pilha *p) {
+    // Validação: Pilha deve estar cheia (topo == 2) e fila deve ter 3+ peças.
+    if (p->topo != 2 || f->total < 3) {
+        printf("Erro: Para a troca multipla, a Pilha deve estar cheia (3 pecas) e a Fila deve ter pelo menos 3 pecas.\n");
+        return;
+    }
+
+    // Troca as 3 peças da pilha (índices 0, 1, 2) 
+    // com as 3 primeiras da fila (índices inicio, inicio+1, inicio+2)
+    
+    for (int i = 0; i < 3; i++) {
+        // Calcula o índice circular para a fila
+        int idx_fila = (f->inicio + i) % MAX_FILA;
+        
+        // O índice da pilha é simplesmente 'i' (0, 1, 2)
+        int idx_pilha = i; 
+        
+        Peca temp = f->itens[idx_fila];
+        f->itens[idx_fila] = p->itens[idx_pilha];
+        p->itens[idx_pilha] = temp;
+    }
+
+    printf("Troca multipla realizada: 3 da Fila <-> 3 da Pilha.\n");
+}
 
 
 int main() {
     srand(time(NULL)); 
     
     Fila fila;
-    Pilha pilha; // Nível Aventureiro
+    Pilha pilha; 
 
     inicializarFila(&fila);
-    inicializarPilha(&pilha); // Nível Aventureiro
+    inicializarPilha(&pilha); 
 
     // Preenche a fila inicial com 5 peças
     for (int i = 0; i < MAX_FILA; i++) {
@@ -190,14 +227,16 @@ int main() {
 
     int opcao = -1;
     while (opcao != 0) {
-        printf("\n--- Tetris Stack (Nivel Aventureiro) ---\n");
+        printf("\n--- Tetris Stack (Nivel Mestre) ---\n");
         mostrarFila(&fila);
-        mostrarPilha(&pilha); // Nível Aventureiro
-        printf("-----------------------------------------\n");
+        mostrarPilha(&pilha); 
+        printf("-------------------------------------\n");
         printf("Menu:\n");
         printf("  1 - Jogar peca (remove da frente)\n");
         printf("  2 - Reservar peca (fila -> pilha)\n");
         printf("  3 - Usar peca reservada (pilha)\n");
+        printf("  4 - Trocar frente da fila com topo da pilha\n");
+        printf("  5 - Trocar 3 da fila com 3 da pilha\n");
         printf("  0 - Sair\n");
         printf("Escolha uma opcao: ");
         
@@ -213,9 +252,7 @@ int main() {
                 } else {
                     Peca jogada = dequeue(&fila);
                     printf("Peca jogada: [%c%d]\n", jogada.tipo, jogada.id);
-                    
-                    // Repõe a peça na fila para manter 5
-                    enqueue(&fila, gerarPeca());
+                    enqueue(&fila, gerarPeca()); // Repõe
                 }
                 break;
             }
@@ -225,13 +262,10 @@ int main() {
                 } else if (filaVazia(&fila)) {
                     printf("Erro: Fila esta vazia, nao pode reservar!\n");
                 } else {
-                    // Tira da fila e coloca na pilha
                     Peca reservada = dequeue(&fila);
                     push(&pilha, reservada);
                     printf("Peca [%c%d] reservada.\n", reservada.tipo, reservada.id);
-                    
-                    // Repõe a peça na fila para manter 5
-                    enqueue(&fila, gerarPeca());
+                    enqueue(&fila, gerarPeca()); // Repõe
                 }
                 break;
             }
@@ -241,8 +275,15 @@ int main() {
                 } else {
                     Peca usada = pop(&pilha);
                     printf("Peca [%c%d] usada da reserva.\n", usada.tipo, usada.id);
-                    // Peça usada não volta para a fila
                 }
+                break;
+            }
+            case 4: { // Trocar frente da fila com topo da pilha (Mestre)
+                trocarPecaFilaPilha(&fila, &pilha);
+                break;
+            }
+            case 5: { // Trocar 3 primeiros da fila com 3 da pilha (Mestre)
+                trocar3PecasFilaPilha(&fila, &pilha);
                 break;
             }
             case 0:
@@ -252,8 +293,6 @@ int main() {
                 printf("Opcao invalida! Tente novamente.\n");
         }
     }
-    
-    // Nível Mestre: Integração Estratégica entre Fila e Pilha
 
     return 0;
 }
